@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter/services.dart'; 
 
 class InputScreen extends StatefulWidget {
   @override
@@ -18,6 +22,24 @@ class _InputScreenState extends State<InputScreen> {
   TextEditingController _pekerjaanController = TextEditingController();
   TextEditingController _kewarganegaraanController = TextEditingController();
   TextEditingController _berlakuHinggaController = TextEditingController();
+
+  List<String> _countries = [];
+
+  Future<void> _fetchCountries() async {
+    final response = await http.get(Uri.parse('https://restcountries.com/v3.1/all'));
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      setState(() {
+        _countries = data.map((country) => country['name']['common']).toList().cast<String>();
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCountries();
+  }
 
   Future<void> _saveData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -58,6 +80,19 @@ class _InputScreenState extends State<InputScreen> {
     _berlakuHinggaController.clear();
   }
 
+  Future<void> _selectDate(BuildContext context, TextEditingController controller) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      String formattedDate = DateFormat('dd/MM/yyyy').format(picked);
+      controller.text = formattedDate;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,18 +106,40 @@ class _InputScreenState extends State<InputScreen> {
             TextField(
               controller: _nikController,
               decoration: InputDecoration(labelText: 'NIK'),
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
             TextField(
               controller: _namaController,
               decoration: InputDecoration(labelText: 'Nama'),
             ),
-            TextField(
-              controller: _tanggalLahirController,
-              decoration: InputDecoration(labelText: 'Tanggal Lahir'),
+            GestureDetector(
+              onTap: () => _selectDate(context, _tanggalLahirController),
+              child: AbsorbPointer(
+                child: TextField(
+                  controller: _tanggalLahirController,
+                  decoration: InputDecoration(labelText: 'Tanggal Lahir'),
+                ),
+              ),
             ),
-            TextField(
-              controller: _jenisKelaminController,
+            DropdownButtonFormField<String>(
+              value: _jenisKelaminController.text,
               decoration: InputDecoration(labelText: 'Jenis Kelamin'),
+              items: [
+                DropdownMenuItem(
+                  value: 'Laki-laki',
+                  child: Text('Laki-laki'),
+                ),
+                DropdownMenuItem(
+                  value: 'Perempuan',
+                  child: Text('Perempuan'),
+                ),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  _jenisKelaminController.text = value!;
+                });
+              },
             ),
             TextField(
               controller: _golonganDarahController,
@@ -96,21 +153,52 @@ class _InputScreenState extends State<InputScreen> {
               controller: _agamaController,
               decoration: InputDecoration(labelText: 'Agama'),
             ),
-            TextField(
-              controller: _statusPerkawinanController,
+            DropdownButtonFormField<String>(
+              value: _statusPerkawinanController.text,
               decoration: InputDecoration(labelText: 'Status Perkawinan'),
+              items: [
+                DropdownMenuItem(
+                  value: 'Kawin',
+                  child: Text('Kawin'),
+                ),
+                DropdownMenuItem(
+                  value: 'Belum Kawin',
+                  child: Text('Belum Kawin'),
+                ),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  _statusPerkawinanController.text = value!;
+                });
+              },
             ),
             TextField(
               controller: _pekerjaanController,
               decoration: InputDecoration(labelText: 'Pekerjaan'),
             ),
-            TextField(
-              controller: _kewarganegaraanController,
+            DropdownButtonFormField<String>(
+              value: _kewarganegaraanController.text,
               decoration: InputDecoration(labelText: 'Kewarganegaraan'),
+              items: _countries.map((country) {
+                return DropdownMenuItem(
+                  value: country,
+                  child: Text(country),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _kewarganegaraanController.text = value!;
+                });
+              },
             ),
-            TextField(
-              controller: _berlakuHinggaController,
-              decoration: InputDecoration(labelText: 'Berlaku Hingga'),
+            GestureDetector(
+              onTap: () => _selectDate(context, _berlakuHinggaController),
+              child: AbsorbPointer(
+                child: TextField(
+                  controller: _berlakuHinggaController,
+                  decoration: InputDecoration(labelText: 'Berlaku Hingga'),
+                ),
+              ),
             ),
             SizedBox(height: 16),
             ElevatedButton(
