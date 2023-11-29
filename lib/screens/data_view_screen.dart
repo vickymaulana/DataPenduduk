@@ -13,6 +13,15 @@ class _DataViewScreenState extends State<DataViewScreen> {
     return dataList?.map((data) => data.split(','))?.toList() ?? [];
   }
 
+  void _deleteData(int index) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<List<String>> dataList = await _getData();
+    dataList.removeAt(index);
+    List<String> newDataList = dataList.map((data) => data.join(',')).toList();
+    await prefs.setStringList('dataList', newDataList);
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,54 +36,68 @@ class _DataViewScreenState extends State<DataViewScreen> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
-            return ListView.builder(
-              itemCount: snapshot.data!.length,
-              itemBuilder: (context, index) {
-                List<String> data = snapshot.data![index];
-                return Card(
-                  child: ListTile(
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: Text('Data Lengkap'),
-                            content: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                for (int i = 0; i < data.length; i++)
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.grey),
-                                      borderRadius: BorderRadius.circular(8.0),
+            if (snapshot.data == null) {
+              return Center(child: Text('No data'));
+            } else {
+              return ListView.separated(
+                itemCount: snapshot.data!.length,
+                separatorBuilder: (context, index) => Divider(),
+                itemBuilder: (context, index) {
+                  List<String> data = snapshot.data![index];
+                  return Card(
+                    child: ListTile(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text('Data Lengkap'),
+                              content: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  for (int i = 0; i < data.length; i++)
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.grey),
+                                        borderRadius: BorderRadius.circular(8.0),
+                                      ),
+                                      padding: EdgeInsets.all(8.0),
+                                      margin: EdgeInsets.symmetric(vertical: 4.0),
+                                      child: Text(
+                                        '${_getFieldName(i)}: ${data[i]}',
+                                        style: TextStyle(fontSize: 16),
+                                      ),
                                     ),
-                                    padding: EdgeInsets.all(8.0),
-                                    margin: EdgeInsets.symmetric(vertical: 4.0),
-                                    child: Text(
-                                      '${_getFieldName(i)}: ${data[i]}',
-                                      style: TextStyle(fontSize: 16),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: Text('Close'),
+                                ],
                               ),
-                            ],
-                          );
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text('Close'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      title: Text('NIK: ${data[0]}'),
+                      subtitle: Text('Nama: ${data[1]}'),
+                      trailing: IconButton(
+                        icon: Icon(
+                          Icons.delete,
+                          color: Colors.red,
+                        ),
+                        onPressed: () {
+                          _deleteData(index);
                         },
-                      );
-                    },
-                    title: Text('NIK: ${data[0]}'),
-                    subtitle: Text('Nama: ${data[1]}'),
-                  ),
-                );
-              },
-            );
+                      ),
+                    ),
+                  );
+                },
+              );
+            }
           }
         },
       ),

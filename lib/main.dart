@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'UTS Pemograman Mobile - Vicky',
+      title: 'Data Penduduk',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -32,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('PEMOGMOBILE UTS - Vicky'),
+        title: Text('Data Penduduk'),
       ),
       body: AnimatedSwitcher(
         duration: Duration(milliseconds: 500),
