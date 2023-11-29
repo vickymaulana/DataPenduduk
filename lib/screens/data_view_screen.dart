@@ -1,5 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
 
 class DataViewScreen extends StatefulWidget {
   @override
@@ -29,6 +32,24 @@ class _DataViewScreenState extends State<DataViewScreen> {
     setState(() {
       _filteredDataList = _dataList.where((data) => data[0].contains(query)).toList();
     });
+  }
+
+  void _shareData(List<String> data) async {
+    String message = 'Data Lengkap:\n';
+    for (int i = 0; i < data.length; i++) {
+      message += '${_getFieldName(i)}: ${data[i]}\n';
+    }
+
+    // Create a temporary file
+    Directory tempDir = await getTemporaryDirectory();
+    String tempPath = tempDir.path;
+    String fileName = 'data_${data[0]}.txt';
+    String filePath = '$tempPath/$fileName';
+    File file = File(filePath);
+    await file.writeAsString(message);
+
+    // Open the file
+    OpenFile.open(filePath);
   }
 
   @override
@@ -141,11 +162,23 @@ class _DataViewScreenState extends State<DataViewScreen> {
             SizedBox(height: 16.0),
             Align(
               alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text('Close'),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('Close'),
+                  ),
+                  SizedBox(width: 8.0),
+                  TextButton(
+                    onPressed: () {
+                      _shareData(data);
+                    },
+                    child: Text('Share'),
+                  ),
+                ],
               ),
             ),
           ],
