@@ -90,33 +90,66 @@ class _InputScreenState extends State<InputScreen> {
         padding: EdgeInsets.all(16),
         child: Column(
           children: [
-            _buildTextField(_nikController, 'NIK', TextInputType.number, [FilteringTextInputFormatter.digitsOnly]),
-            _buildTextField(_namaController, 'Nama'),
+            Padding(
+              padding: EdgeInsets.only(bottom: 16),
+              child: _buildTextField(_nikController, 'NIK', TextInputType.number, [FilteringTextInputFormatter.digitsOnly]),
+            ),
+            Padding(
+              padding: EdgeInsets.only(bottom: 16),
+              child: _buildTextField(_namaController, 'Nama'),
+            ),
             GestureDetector(
               onTap: () => _selectDate(context, _tanggalLahirController),
               child: AbsorbPointer(
-                child: _buildTextField(_tanggalLahirController, 'Tanggal Lahir'),
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: 16),
+                  child: _buildTextField(_tanggalLahirController, 'Tanggal Lahir'),
+                ),
               ),
             ),
-            _buildDropdownButtonFormField(
-              _jenisKelaminController,
-              'Jenis Kelamin',
-              ['Laki-laki', 'Perempuan'],
+            Padding(
+              padding: EdgeInsets.only(bottom: 16),
+              child: _buildDropdownButtonFormField(
+                _jenisKelaminController,
+                'Jenis Kelamin',
+                ['Laki-laki', 'Perempuan'],
+              ),
             ),
-            _buildTextField(_golonganDarahController, 'Golongan Darah'),
-            _buildTextField(_alamatController, 'Alamat'),
-            _buildTextField(_agamaController, 'Agama'),
-            _buildDropdownButtonFormField(
-              _statusPerkawinanController,
-              'Status Perkawinan',
-              ['Kawin', 'Belum Kawin'],
+            Padding(
+              padding: EdgeInsets.only(bottom: 16),
+              child: _buildTextField(_golonganDarahController, 'Golongan Darah'),
             ),
-            _buildTextField(_pekerjaanController, 'Pekerjaan'),
-            _buildTextField(_kewarganegaraanController, 'Kewarganegaraan'),
+            Padding(
+              padding: EdgeInsets.only(bottom: 16),
+              child: _buildTextField(_alamatController, 'Alamat'),
+            ),
+            Padding(
+              padding: EdgeInsets.only(bottom: 16),
+              child: _buildTextField(_agamaController, 'Agama'),
+            ),
+            Padding(
+              padding: EdgeInsets.only(bottom: 16),
+              child: _buildDropdownButtonFormField(
+                _statusPerkawinanController,
+                'Status Perkawinan',
+                ['Kawin', 'Belum Kawin'],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(bottom: 16),
+              child: _buildTextField(_pekerjaanController, 'Pekerjaan'),
+            ),
+            Padding(
+              padding: EdgeInsets.only(bottom: 16),
+              child: _buildTextField(_kewarganegaraanController, 'Kewarganegaraan'),
+            ),
             GestureDetector(
               onTap: () => _selectDate(context, _berlakuHinggaController),
               child: AbsorbPointer(
-                child: _buildTextField(_berlakuHinggaController, 'Berlaku Hingga'),
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: 16),
+                  child: _buildTextField(_berlakuHinggaController, 'Berlaku Hingga'),
+                ),
               ),
             ),
             SizedBox(height: 16),
