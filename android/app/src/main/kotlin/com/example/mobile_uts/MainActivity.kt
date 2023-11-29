@@ -1,4 +1,4 @@
-package com.example.mobile_uts
+package com.example.DataPenduduk
 
 import io.flutter.embedding.android.FlutterActivity
 

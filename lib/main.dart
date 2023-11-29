@@ -14,6 +14,7 @@ class MyApp extends StatelessWidget {
       title: 'Data Penduduk',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: HomeScreen(),
     );
@@ -61,6 +62,11 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Data',
           ),
         ],
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
+        backgroundColor: Colors.white,
+        elevation: 5,
+        type: BottomNavigationBarType.fixed,
       ),
     );
   }

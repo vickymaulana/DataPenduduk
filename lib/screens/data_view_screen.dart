@@ -7,42 +7,66 @@ class DataViewScreen extends StatefulWidget {
 }
 
 class _DataViewScreenState extends State<DataViewScreen> {
+  List<List<String>> _dataList = [];
+  List<List<String>> _filteredDataList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _getData();
+  }
+
+  Future<void> _getData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String>? dataList = prefs.getStringList('dataList');
+    _dataList = dataList?.map((data) => data.split(','))?.toList() ?? [];
+    setState(() {
+      _filteredDataList = _dataList;
+    });
+  }
+
+  void _filterData(String query) {
+    setState(() {
+      _filteredDataList = _dataList.where((data) => data[0].contains(RegExp(r'^[0-9]+$'))).toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('View Data'),
       ),
-      body: FutureBuilder<List<List<String>>>(
-        future: _getData(),
-        builder: (BuildContext context, AsyncSnapshot<List<List<String>>> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else {
-            if (snapshot.data == null) {
-              return Center(child: Text('No data'));
-            } else {
-              return ListView.separated(
-                itemCount: snapshot.data!.length,
-                separatorBuilder: (context, index) => Divider(),
-                itemBuilder: (context, index) {
-                  List<String> data = snapshot.data![index];
-                  return _buildDataCard(data, index);
-                },
-              );
-            }
-          }
-        },
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              keyboardType: TextInputType.number, // Set the keyboard type to number
+              onChanged: (value) {
+                _filterData(value);
+              },
+              decoration: InputDecoration(
+                labelText: 'Cari Sesuai NIK',
+                prefixIcon: Icon(Icons.search),
+              ),
+            ),
+          ),
+          Expanded(
+            child: _filteredDataList.isEmpty
+                ? Center(child: Text('No data'))
+                : ListView.separated(
+                    itemCount: _filteredDataList.length,
+                    separatorBuilder: (context, index) => Divider(),
+                    itemBuilder: (context, index) {
+                      List<String> data = _filteredDataList[index];
+                      return _buildDataCard(data, index);
+                    },
+                  ),
+          ),
+        ],
       ),
     );
-  }
-
-  Future<List<List<String>>> _getData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? dataList = prefs.getStringList('dataList');
-    return dataList?.map((data) => data.split(','))?.toList() ?? [];
   }
 
   Widget _buildDataCard(List<String> data, int index) {
@@ -77,6 +101,7 @@ class _DataViewScreenState extends State<DataViewScreen> {
         borderRadius: BorderRadius.circular(16.0),
       ),
       child: Container(
+        width: MediaQuery.of(context).size.width * 0.8,
         padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,11 +185,12 @@ class _DataViewScreenState extends State<DataViewScreen> {
 
   void _deleteData(int index) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<List<String>> dataList = await _getData();
-    dataList.removeAt(index);
-    List<String> newDataList = dataList.map((data) => data.join(',')).toList();
+    _dataList.removeAt(index);
+    List<String> newDataList = _dataList.map((data) => data.join(',')).toList();
     await prefs.setStringList('dataList', newDataList);
-    setState(() {});
+    setState(() {
+      _filteredDataList = _dataList;
+    });
   }
 
   String _getFieldName(int index) {
