@@ -27,7 +27,7 @@ class _DataViewScreenState extends State<DataViewScreen> {
 
   void _filterData(String query) {
     setState(() {
-      _filteredDataList = _dataList.where((data) => data[0].contains(RegExp(r'^[0-9]+$'))).toList();
+      _filteredDataList = _dataList.where((data) => data[0].contains(query)).toList();
     });
   }
 
@@ -42,7 +42,6 @@ class _DataViewScreenState extends State<DataViewScreen> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-              keyboardType: TextInputType.number, // Set the keyboard type to number
               onChanged: (value) {
                 _filterData(value);
               },
@@ -101,7 +100,6 @@ class _DataViewScreenState extends State<DataViewScreen> {
         borderRadius: BorderRadius.circular(16.0),
       ),
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.8,
         padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
