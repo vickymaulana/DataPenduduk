@@ -29,6 +29,27 @@ class _InputScreenState extends State<InputScreen> {
   }
 
   Future<void> _saveData() async {
+    if (!_validateFields()) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text('Semua field harus diisi'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> data = [
       _nikController.text,
@@ -51,6 +72,20 @@ class _InputScreenState extends State<InputScreen> {
     }
     await prefs.setStringList('dataList', dataList);
     _clearFields();
+  }
+
+  bool _validateFields() {
+    return _nikController.text.isNotEmpty &&
+        _namaController.text.isNotEmpty &&
+        _tanggalLahirController.text.isNotEmpty &&
+        _jenisKelaminController.text.isNotEmpty &&
+        _golonganDarahController.text.isNotEmpty &&
+        _alamatController.text.isNotEmpty &&
+        _agamaController.text.isNotEmpty &&
+        _statusPerkawinanController.text.isNotEmpty &&
+        _pekerjaanController.text.isNotEmpty &&
+        _kewarganegaraanController.text.isNotEmpty &&
+        _berlakuHinggaController.text.isNotEmpty;
   }
 
   void _clearFields() {

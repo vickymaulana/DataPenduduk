@@ -7,21 +7,6 @@ class DataViewScreen extends StatefulWidget {
 }
 
 class _DataViewScreenState extends State<DataViewScreen> {
-  Future<List<List<String>>> _getData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? dataList = prefs.getStringList('dataList');
-    return dataList?.map((data) => data.split(','))?.toList() ?? [];
-  }
-
-  void _deleteData(int index) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<List<String>> dataList = await _getData();
-    dataList.removeAt(index);
-    List<String> newDataList = dataList.map((data) => data.join(',')).toList();
-    await prefs.setStringList('dataList', newDataList);
-    setState(() {});
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,57 +29,7 @@ class _DataViewScreenState extends State<DataViewScreen> {
                 separatorBuilder: (context, index) => Divider(),
                 itemBuilder: (context, index) {
                   List<String> data = snapshot.data![index];
-                  return Card(
-                    child: ListTile(
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: Text('Data Lengkap'),
-                              content: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  for (int i = 0; i < data.length; i++)
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        border: Border.all(color: Colors.grey),
-                                        borderRadius: BorderRadius.circular(8.0),
-                                      ),
-                                      padding: EdgeInsets.all(8.0),
-                                      margin: EdgeInsets.symmetric(vertical: 4.0),
-                                      child: Text(
-                                        '${_getFieldName(i)}: ${data[i]}',
-                                        style: TextStyle(fontSize: 16),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: Text('Close'),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
-                      title: Text('NIK: ${data[0]}'),
-                      subtitle: Text('Nama: ${data[1]}'),
-                      trailing: IconButton(
-                        icon: Icon(
-                          Icons.delete,
-                          color: Colors.red,
-                        ),
-                        onPressed: () {
-                          _deleteData(index);
-                        },
-                      ),
-                    ),
-                  );
+                  return _buildDataCard(data, index);
                 },
               );
             }
@@ -102,6 +37,134 @@ class _DataViewScreenState extends State<DataViewScreen> {
         },
       ),
     );
+  }
+
+  Future<List<List<String>>> _getData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String>? dataList = prefs.getStringList('dataList');
+    return dataList?.map((data) => data.split(','))?.toList() ?? [];
+  }
+
+  Widget _buildDataCard(List<String> data, int index) {
+    return Card(
+      child: ListTile(
+        onTap: () {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return _buildDataDialog(data);
+            },
+          );
+        },
+        title: Text('NIK: ${data[0]}'),
+        subtitle: Text('Nama: ${data[1]}'),
+        trailing: IconButton(
+          icon: Icon(
+            Icons.delete,
+            color: Colors.red,
+          ),
+          onPressed: () {
+            _showDeleteConfirmationDialog(index);
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDataDialog(List<String> data) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      child: Container(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Data Lengkap',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 16.0),
+            for (int i = 0; i < data.length; i++)
+              Container(
+                margin: EdgeInsets.only(bottom: 8.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: Text(
+                        '${_getFieldName(i)}:',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 8.0),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        data[i],
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            SizedBox(height: 16.0),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('Close'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteConfirmationDialog(int index) async {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Delete Data'),
+          content: Text('anda yakin ingin menghapus data ini?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                _deleteData(index);
+                Navigator.of(context).pop();
+              },
+              child: Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _deleteData(int index) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<List<String>> dataList = await _getData();
+    dataList.removeAt(index);
+    List<String> newDataList = dataList.map((data) => data.join(',')).toList();
+    await prefs.setStringList('dataList', newDataList);
+    setState(() {});
   }
 
   String _getFieldName(int index) {
